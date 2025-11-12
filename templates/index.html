@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPO Analysis Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #ecf0f1;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 1400px;
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+
+        .header-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-section p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .stats-row {
+            padding: 1.5rem;
+            background: var(--light-bg);
+            margin: 0;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .ipo-grid {
+            padding: 2rem;
+        }
+
+        .ipo-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .ipo-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .ipo-card-header {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+            border-bottom: none;
+        }
+
+        .ipo-card-body {
+            padding: 1.5rem;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, var(--success-color) 0%, #2ecc71 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3);
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #e67e22 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(243, 156, 18, 0.3);
+        }
+
+        .analysis-modal .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .analysis-modal .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            border-bottom: none;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .positive-indicators {
+            background: rgba(39, 174, 96, 0.05);
+            border-left-color: var(--success-color);
+        }
+
+        .negative-indicators {
+            background: rgba(231, 76, 60, 0.05);
+            border-left-color: var(--danger-color);
+        }
+
+        .ipo-snapshot {
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .business-overview {
+            background: rgba(155, 89, 182, 0.05);
+            border-left-color: #9b59b6;
+        }
+
+        .financial-health {
+            background: rgba(243, 156, 18, 0.05);
+            border-left-color: var(--warning-color);
+        }
+
+        .final-verdict {
+            background: rgba(44, 62, 80, 0.05);
+        }
+
+        .current-ipo-section {
+            background: rgba(39, 174, 96, 0.05);
+            border-left: 5px solid var(--success-color);
+            margin-bottom: 3rem;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .upcoming-ipo-section {
+            background: rgba(243, 156, 18, 0.05);
+            border-left: 5px solid var(--warning-color);
+            margin-bottom: 3rem;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--success-color) 0%, #27ae60 100%);
+            color: white;
+            padding: 1.5rem;
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .upcoming-ipo-section .section-header {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #e67e22 100%);
+        }
+
+        .section-content {
+            padding: 2rem;
+        }
+
+        .section-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .alert-custom {
+            border-radius: 15px;
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+            .header-section h1 {
+                font-size: 2rem;
+            }
+            
+            .dashboard-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header-section {
+                border-radius: 15px 15px 0 0;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="dashboard-container">
+            <!-- Header Section -->
+            <div class="header-section">
+                <h1><i class="bi bi-graph-up-arrow"></i> IPO Analysis Dashboard</h1>
+                <p>Real-time IPO insights powered by AI analysis</p>
+                <div class="mt-3">
+                    <button class="btn refresh-btn" onclick="refreshIPOs()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="row stats-row">
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon text-primary">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <div class="stat-number text-primary" id="total-ipos">-</div>
+                        <div class="text-muted">Total IPOs</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon text-success">
+                            <i class="bi bi-play-circle"></i>
+                        </div>
+                        <div class="stat-number text-success" id="current-count">-</div>
+                        <div class="text-muted">Current IPOs</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon text-warning">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div class="stat-number text-warning" id="upcoming-count">-</div>
+                        <div class="text-muted">Upcoming IPOs</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="stat-card">
+                        <div class="stat-icon text-info">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="stat-number text-info" id="analyzed-count">0</div>
+                        <div class="text-muted">Analyzed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IPO Grid -->
+            <div class="ipo-grid">
+                <div id="loading-initial" class="loading-spinner" style="display: block;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading IPOs...</span>
+                    </div>
+                    <p class="mt-2">Loading current IPOs...</p>
+                </div>
+                
+                <!-- Current IPOs Section -->
+                <div id="current-ipo-section" class="current-ipo-section" style="display: none;">
+                    <div class="section-header">
+                        <div>
+                            <i class="bi bi-play-circle me-2"></i>
+                            Current IPOs
+                        </div>
+                        <div class="section-badge" id="current-badge">
+                            0 IPOs
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div id="current-ipo-container" class="row">
+                            <!-- Current IPO cards will be populated here -->
+                        </div>
+                        <div id="no-current-ipos" class="alert alert-info alert-custom text-center" style="display: none;">
+                            <i class="bi bi-info-circle fs-4"></i>
+                            <h5 class="mt-2">No Current IPOs Found</h5>
+                            <p class="mb-0">There are currently no active IPOs available for investment.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upcoming IPOs Section -->
+                <div id="upcoming-ipo-section" class="upcoming-ipo-section" style="display: none;">
+                    <div class="section-header">
+                        <div>
+                            <i class="bi bi-clock me-2"></i>
+                            Upcoming IPOs
+                        </div>
+                        <div class="section-badge" id="upcoming-badge">
+                            0 IPOs
+                        </div>
+                    </div>
+                    <div class="section-content">
+                        <div id="upcoming-ipo-container" class="row">
+                            <!-- Upcoming IPO cards will be populated here -->
+                        </div>
+                        <div id="no-upcoming-ipos" class="alert alert-warning alert-custom text-center" style="display: none;">
+                            <i class="bi bi-clock fs-4"></i>
+                            <h5 class="mt-2">No Upcoming IPOs Found</h5>
+                            <p class="mb-0">There are currently no upcoming IPOs scheduled.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="no-ipos" class="alert alert-info alert-custom text-center" style="display: none;">
+                    <i class="bi bi-info-circle fs-4"></i>
+                    <h5 class="mt-2">No IPOs Found</h5>
+                    <p class="mb-0">There are currently no current or upcoming IPOs available for analysis.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Modal -->
+    <div class="modal fade analysis-modal" id="analysisModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-graph-up"></i> 
+                        <span id="analysis-type-label">IPO</span> Analysis: <span id="analysis-company-name"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="analysis-loading" class="loading-spinner">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Analyzing IPO...</span>
+                        </div>
+                        <p class="mt-2">AI is analyzing the IPO data...</p>
+                    </div>
+                    
+                    <div id="analysis-content" style="display: none;">
+                        <!-- Analysis sections will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let analysisModal;
+        let analyzedCount = 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            analysisModal = new bootstrap.Modal(document.getElementById('analysisModal'));
+            loadIPOs();
+        });
+
+        async function loadIPOs() {
+            try {
+                const response = await fetch('/api/ipos');
+                const result = await response.json();
+
+                document.getElementById('loading-initial').style.display = 'none';
+
+                if (result.success) {
+                    displayIPOs(result);
+                    updateStats(result);
+                } else {
+                    showError('Failed to load IPOs: ' + result.error);
+                }
+            } catch (error) {
+                document.getElementById('loading-initial').style.display = 'none';
+                showError('Error loading IPOs: ' + error.message);
+            }
+        }
+
+        function displayIPOs(data) {
+            const currentIPOs = data.current_ipos || [];
+            const upcomingIPOs = data.upcoming_ipos || [];
+            
+            // Show sections if there are IPOs
+            if (currentIPOs.length > 0 || upcomingIPOs.length > 0) {
+                if (currentIPOs.length > 0) {
+                    document.getElementById('current-ipo-section').style.display = 'block';
+                    displayCurrentIPOs(currentIPOs);
+                }
+                
+                if (upcomingIPOs.length > 0) {
+                    document.getElementById('upcoming-ipo-section').style.display = 'block';
+                    displayUpcomingIPOs(upcomingIPOs);
+                }
+            } else {
+                document.getElementById('no-ipos').style.display = 'block';
+            }
+        }
+
+        function displayCurrentIPOs(ipos) {
+            const container = document.getElementById('current-ipo-container');
+            const badge = document.getElementById('current-badge');
+            
+            badge.textContent = `${ipos.length} IPO${ipos.length !== 1 ? 's' : ''}`;
+            
+            if (ipos.length === 0) {
+                document.getElementById('no-current-ipos').style.display = 'block';
+                return;
+            }
+
+            container.innerHTML = ipos.map((ipo, index) => `
+                <div class="col-lg-6 col-xl-4">
+                    <div class="card ipo-card">
+                        <div class="ipo-card-header">
+                            <h5 class="card-title mb-1">
+                                <i class="bi bi-building"></i> ${ipo.name}
+                            </h5>
+                            <small class="opacity-75">
+                                <i class="bi bi-play-circle"></i> Current IPO - Click to analyze
+                            </small>
+                        </div>
+                        <div class="ipo-card-body">
+                            <p class="card-text text-muted mb-3">
+                                <i class="bi bi-link-45deg"></i> 
+                                <a href="${ipo.url}" target="_blank" class="text-decoration-none">View Details</a>
+                            </p>
+                            <button class="btn analyze-btn w-100" onclick="analyzeIPO('current', ${index}, '${ipo.name}')">
+                                <i class="bi bi-robot"></i> Analyze with AI
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayUpcomingIPOs(ipos) {
+            const container = document.getElementById('upcoming-ipo-container');
+            const badge = document.getElementById('upcoming-badge');
+            
+            badge.textContent = `${ipos.length} IPO${ipos.length !== 1 ? 's' : ''}`;
+            
+            if (ipos.length === 0) {
+                document.getElementById('no-upcoming-ipos').style.display = 'block';
+                return;
+            }
+
+            container.innerHTML = ipos.map((ipo, index) => `
+                <div class="col-lg-6 col-xl-4">
+                    <div class="card ipo-card">
+                        <div class="ipo-card-header" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+                            <h5 class="card-title mb-1">
+                                <i class="bi bi-building"></i> ${ipo.name}
+                            </h5>
+                            <small class="opacity-75">
+                                <i class="bi bi-clock"></i> Upcoming IPO - Click to analyze
+                            </small>
+                        </div>
+                        <div class="ipo-card-body">
+                            <p class="card-text text-muted mb-3">
+                                <i class="bi bi-link-45deg"></i> 
+                                <a href="${ipo.url}" target="_blank" class="text-decoration-none">View Details</a>
+                            </p>
+                            <button class="btn w-100" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border: none; border-radius: 25px; padding: 0.75rem 2rem; font-weight: 600; color: white; transition: all 0.3s ease;" onclick="analyzeIPO('upcoming', ${index}, '${ipo.name}')">
+                                <i class="bi bi-robot"></i> Analyze with AI
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(result) {
+            document.getElementById('total-ipos').textContent = result.total_count || 0;
+            document.getElementById('current-count').textContent = result.current_count || 0;
+            document.getElementById('upcoming-count').textContent = result.upcoming_count || 0;
+        }
+
+        async function analyzeIPO(ipoType, index, companyName) {
+            document.getElementById('analysis-company-name').textContent = companyName;
+            document.getElementById('analysis-type-label').textContent = ipoType.toUpperCase();
+            document.getElementById('analysis-loading').style.display = 'block';
+            document.getElementById('analysis-content').style.display = 'none';
+            analysisModal.show();
+
+            try {
+                const response = await fetch(`/api/ipo/${ipoType}/${index}/analyze`);
+                const result = await response.json();
+
+                document.getElementById('analysis-loading').style.display = 'none';
+
+                if (result.success) {
+                    displayAnalysis(result.data);
+                    analyzedCount++;
+                    document.getElementById('analyzed-count').textContent = analyzedCount;
+                } else {
+                    showAnalysisError(result.error);
+                }
+            } catch (error) {
+                document.getElementById('analysis-loading').style.display = 'none';
+                showAnalysisError('Error analyzing IPO: ' + error.message);
+            }
+        }
+
+        function displayAnalysis(data) {
+            const sections = data.sections || {};
+            const content = document.getElementById('analysis-content');
+            
+            const sectionMappings = {
+                'IPO Snapshot': { icon: 'bi-info-circle', class: 'ipo-snapshot' },
+                'Business Overview': { icon: 'bi-briefcase', class: 'business-overview' },
+                'Financial Health': { icon: 'bi-graph-up', class: 'financial-health' },
+                'Positive Indicators (Reasons to consider applying)': { icon: 'bi-check-circle', class: 'positive-indicators' },
+                'Negative Indicators (Reasons for caution)': { icon: 'bi-exclamation-triangle', class: 'negative-indicators' },
+                'Final Verdict': { icon: 'bi-clipboard-check', class: 'final-verdict' }
+            };
+
+            content.innerHTML = Object.entries(sections).map(([title, content]) => {
+                const mapping = sectionMappings[title] || { icon: 'bi-file-text', class: '' };
+                return `
+                    <div class="analysis-section ${mapping.class}">
+                        <div class="section-title">
+                            <i class="${mapping.icon}"></i>
+                            ${title}
+                        </div>
+                        <div class="section-content">
+                            ${formatContent(content)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            content.style.display = 'block';
+        }
+
+        function formatContent(content) {
+            // Convert bullet points to HTML lists
+            return content
+                .split('\n')
+                .map(line => {
+                    if (line.trim().startsWith('*') || line.trim().startsWith('-')) {
+                        return `<li>${line.trim().substring(1).trim()}</li>`;
+                    }
+                    return line.trim() ? `<p>${line.trim()}</p>` : '';
+                })
+                .join('')
+                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                .replace(/<\/ul><ul>/g, '');
+        }
+
+        function showAnalysisError(error) {
+            document.getElementById('analysis-content').innerHTML = `
+                <div class="alert alert-danger alert-custom">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Analysis Error:</strong> ${error}
+                </div>
+            `;
+            document.getElementById('analysis-content').style.display = 'block';
+        }
+
+        function showError(message) {
+            const currentContainer = document.getElementById('current-ipo-container');
+            const upcomingContainer = document.getElementById('upcoming-ipo-container');
+            
+            const errorHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger alert-custom">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Error:</strong> ${message}
+                    </div>
+                </div>
+            `;
+            
+            currentContainer.innerHTML = errorHTML;
+            upcomingContainer.innerHTML = errorHTML;
+            
+            // Show sections to display the error
+            document.getElementById('current-ipo-section').style.display = 'block';
+            document.getElementById('upcoming-ipo-section').style.display = 'block';
+        }
+
+        async function refreshIPOs() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const originalHTML = refreshBtn.innerHTML;
+            
+            refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Refreshing...';
+            refreshBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/refresh');
+                const result = await response.json();
+                
+                if (result.success) {
+                    analyzedCount = 0;
+                    document.getElementById('analyzed-count').textContent = '0';
+                    
+                    // Hide all sections before reloading
+                    document.getElementById('current-ipo-section').style.display = 'none';
+                    document.getElementById('upcoming-ipo-section').style.display = 'none';
+                    document.getElementById('no-ipos').style.display = 'none';
+                    document.getElementById('no-current-ipos').style.display = 'none';
+                    document.getElementById('no-upcoming-ipos').style.display = 'none';
+                    
+                    await loadIPOs();
+                } else {
+                    showError('Failed to refresh: ' + result.error);
+                }
+            } catch (error) {
+                showError('Error refreshing data: ' + error.message);
+            } finally {
+                refreshBtn.innerHTML = originalHTML;
+                refreshBtn.disabled = false;
+            }
+        }
+
+        // Add spinning animation for refresh button
+        const style = document.createElement('style');
+        style.textContent = `
+            .spin {
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
