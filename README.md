@@ -187,10 +187,5 @@ This tool is designed for educational and informational purposes only. The IPO a
 - **Flask** for lightweight web framework
 - **LangChain** for LLM integration tools
 
-## 📧 Contact
-
-For questions, suggestions, or support, please open an issue on GitHub or contact [your-email@example.com].
-
----
 
 **Happy IPO Analysis!** 🎯📈
